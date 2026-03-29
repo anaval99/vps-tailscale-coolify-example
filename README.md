@@ -41,7 +41,7 @@ docker compose up -d
 ```
 
 Required `.env` values:
-- `TS_AUTHKEY` — Tailscale auth key ([generate here](https://login.tailscale.com/admin/settings/keys))
+- `TS_AUTHKEY` — Tailscale auth key ([generate here](https://login.tailscale.com/admin/settings/keys)). Use separate reusable keys for VPS and home server to avoid device conflicts.
 - `COOLIFY_TAILSCALE_IP` — your home server's Tailscale IP (e.g. `100.x.x.x`)
 - `ACME_EMAIL` — email for Let's Encrypt certificates
 
@@ -64,11 +64,15 @@ In the Coolify dashboard:
 
 ⚠️⚠️⚠️ By default, Traefik doesn't trust `X-Forwarded-Proto` from upstream proxies. This can cause redirect loops in apps that check the protocol. To fix this, add the following to Coolify's Traefik config via `docker-compose.custom.yml` on your home server (at `/data/coolify/source/docker-compose.custom.yml`):
 
+⚠️⚠️⚠️ The `command` key in `docker-compose.custom.yml` **replaces** the entire command list — it does not append. You must copy all existing Traefik args from `/data/coolify/source/docker-compose.yml` and add the `trustedips` line alongside them. A malformed file can prevent Coolify from starting.
+
 ```yaml
 services:
   proxy:
     command:
+      # ... copy all existing args from docker-compose.yml first, then add:
       - --entrypoints.http.forwardedheaders.trustedips=100.64.0.0/10
+      - --entrypoints.https.forwardedheaders.trustedips=100.64.0.0/10
 ```
 
 The `100.64.0.0/10` range covers all Tailscale IPs, so Traefik will trust headers from your VPS.
@@ -108,3 +112,9 @@ Trigger deployments via Coolify's API from a GitHub Action — no inbound webhoo
 | 8000 | Home Server | Coolify dashboard |
 | 6001 | Home Server | Coolify realtime (WebSocket) |
 | 6002 | Home Server | Coolify terminal (WebSocket) |
+
+## VPS Requirements
+
+- KVM-based virtualization (not OpenVZ/LXC) — needed for `/dev/net/tun` support
+- Ports 80 and 443 open in firewall / security group
+- Most standard providers work: Hetzner, DigitalOcean, Linode, Vultr, OVH
