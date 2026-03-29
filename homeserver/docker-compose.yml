@@ -1,0 +1,16 @@
+services:
+  tailscale-home:
+    image: tailscale/tailscale:latest
+    container_name: tailscale-home
+    hostname: home-server
+    network_mode: host
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+    volumes:
+      - ./ts-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    restart: unless-stopped

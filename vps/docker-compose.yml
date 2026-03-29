@@ -5,7 +5,8 @@ services:
     restart: unless-stopped
     environment:
       - APP1_DOMAIN=${APP1_DOMAIN}
-      - APP1_HOME_POINTER=${APP1_HOME_POINTER}
+      - COOLIFY_DOMAIN=${COOLIFY_DOMAIN}
+      - COOLIFY_TAILSCALE_IP=${COOLIFY_TAILSCALE_IP}
       - ACME_EMAIL=${ACME_EMAIL}
     ports:
       - "80:80"
