@@ -43,15 +43,16 @@ docker compose up -d
 Required `.env` values:
 - `TS_AUTHKEY` — Tailscale auth key ([generate here](https://login.tailscale.com/admin/settings/keys))
 - `COOLIFY_TAILSCALE_IP` — your home server's Tailscale IP (e.g. `100.x.x.x`)
-- `COOLIFY_DOMAIN` — domain for the Coolify dashboard (e.g. `coolify.yourdomain.com`)
-- `APP1_DOMAIN` — domain for your first deployed app
 - `ACME_EMAIL` — email for Let's Encrypt certificates
+
+Then edit `vps/Caddyfile` and replace the example domains with your own.
 
 ### 3. DNS
 
 Point your domains to the VPS public IP:
-- `coolify.yourdomain.com` → VPS IP
-- `app1.yourdomain.com` → VPS IP
+- `example.com` → VPS IP (A record)
+- `www.example.com` → VPS IP (A record)
+- `coolify.example.com` → VPS IP (A or CNAME record)
 
 ### 4. Coolify Configuration
 
@@ -74,7 +75,7 @@ Trigger deployments via Coolify's API from a GitHub Action — no inbound webhoo
 1. Deploy the app in Coolify with its domain set to HTTP
 2. Add a new block in `vps/Caddyfile`:
    ```
-   {$APP2_DOMAIN} {
+   app2.example.com {
      reverse_proxy {$COOLIFY_TAILSCALE_IP}:80 {
        header_up X-Forwarded-Proto {scheme}
        header_up X-Forwarded-Port {port}
@@ -82,7 +83,7 @@ Trigger deployments via Coolify's API from a GitHub Action — no inbound webhoo
      }
    }
    ```
-3. Add `APP2_DOMAIN` to `vps/.env` and the Caddy environment in `vps/docker-compose.yml`
+3. Point `app2.example.com` to your VPS IP in DNS
 4. Restart Caddy: `docker compose restart caddy`
 
 ## Ports Reference

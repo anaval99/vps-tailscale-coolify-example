@@ -4,8 +4,6 @@ services:
     container_name: caddy
     restart: unless-stopped
     environment:
-      - APP1_DOMAIN=${APP1_DOMAIN}
-      - COOLIFY_DOMAIN=${COOLIFY_DOMAIN}
       - COOLIFY_TAILSCALE_IP=${COOLIFY_TAILSCALE_IP}
       - ACME_EMAIL=${ACME_EMAIL}
     ports:
