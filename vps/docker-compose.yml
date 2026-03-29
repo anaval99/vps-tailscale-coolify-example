@@ -1,0 +1,38 @@
+services:
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+    environment:
+      - APP1_DOMAIN=${APP1_DOMAIN}
+      - APP1_HOME_POINTER=${APP1_HOME_POINTER}
+      - ACME_EMAIL=${ACME_EMAIL}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+
+  tailscale-vps:
+    image: tailscale/tailscale:latest
+    container_name: tailscale-vps
+    hostname: vps-gateway
+    network_mode: "service:caddy"
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+    volumes:
+      - ./ts-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      - caddy
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

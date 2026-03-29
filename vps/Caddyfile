@@ -1,0 +1,7 @@
+{
+  email {$ACME_EMAIL}
+}
+
+{$APP1_DOMAIN} {
+  reverse_proxy {$APP1_HOME_POINTER}
+}
