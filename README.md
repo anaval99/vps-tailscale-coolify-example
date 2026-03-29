@@ -57,8 +57,21 @@ Point your domains to the VPS public IP:
 ### 4. Coolify Configuration
 
 In the Coolify dashboard:
-- Set app domains to **HTTP** (not HTTPS) — Caddy on the VPS handles TLS termination
+- **Important: Set app domains to `http://` (not `https://`)** — Caddy on the VPS handles TLS termination. If you use `https://`, Traefik will try to redirect HTTP to HTTPS, causing an infinite redirect loop.
 - Coolify's Traefik routes requests to the correct app by domain on port 80
+
+#### Traefik Forwarded Headers
+
+By default, Traefik doesn't trust `X-Forwarded-Proto` from upstream proxies. This can cause redirect loops in apps that check the protocol. To fix this, add the following to Coolify's Traefik config via `docker-compose.custom.yml` on your home server (at `/data/coolify/source/docker-compose.custom.yml`):
+
+```yaml
+services:
+  proxy:
+    command:
+      - --entrypoints.http.forwardedheaders.trustedips=100.64.0.0/10
+```
+
+The `100.64.0.0/10` range covers all Tailscale IPs, so Traefik will trust headers from your VPS.
 
 ### 5. GitHub Auto-Deploy
 
@@ -93,3 +106,5 @@ Trigger deployments via Coolify's API from a GitHub Action — no inbound webhoo
 | 80, 443 | VPS | Public HTTP/HTTPS (Caddy) |
 | 80 | Home Server | Coolify's Traefik (app routing) |
 | 8000 | Home Server | Coolify dashboard |
+| 6001 | Home Server | Coolify realtime (WebSocket) |
+| 6002 | Home Server | Coolify terminal (WebSocket) |

@@ -18,9 +18,22 @@ example.com {
 
 # Coolify dashboard
 coolify.example.com {
-  reverse_proxy {$COOLIFY_TAILSCALE_IP}:8000 {
-    header_up X-Forwarded-Proto {scheme}
-    header_up X-Forwarded-Port {port}
-    header_up X-Real-IP {remote_host}
+  # Terminal WebSocket
+  handle /terminal/ws* {
+    reverse_proxy {$COOLIFY_TAILSCALE_IP}:6002
+  }
+
+  # Realtime WebSocket
+  handle /app/* {
+    reverse_proxy {$COOLIFY_TAILSCALE_IP}:6001
+  }
+
+  # Everything else
+  handle {
+    reverse_proxy {$COOLIFY_TAILSCALE_IP}:8000 {
+      header_up X-Forwarded-Proto {scheme}
+      header_up X-Forwarded-Port {port}
+      header_up X-Real-IP {remote_host}
+    }
   }
 }
